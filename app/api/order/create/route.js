@@ -1,0 +1,40 @@
+import { NextResponse } from "next/server";
+import { getAuth } from "@clerk/nextjs/server";
+import Product from "@/models/Product";
+import { inngest } from "@/config/inngest";
+import User from "@/models/User";
+
+
+export async function POST(required){
+    try {
+        const { userId } = getAuth(required);
+        const { items,  address } = await required.json();
+        if (!address || items.length === 0) {
+            return NextResponse.json({ success: false, message: "Invalid data" });
+        }
+        // calculate ammount using items
+        const amount = await items.reduce(async (acc, item) => {
+            const product = await Product.findById(item.product);
+            return acc + (product.offerPrice * item.quantity);
+        }, 0);
+        await inngest.sonf({
+            name: "order",
+            event: "order.create",
+            data: {
+                userId,
+                items,
+                address,
+                amount: amount + Math.floor(amount * 0.02), // Adding a random amount to avoid duplicates
+                date: Date.now(),
+            },
+        })
+        //clear user cart
+        const user = await User.findById(userId);
+        user.cartItems = {};
+        await user.save();
+        return NextResponse.json({ success: true, message: "Order placed successfully" });
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json({ success: false, message: error.message });
+    }
+}
