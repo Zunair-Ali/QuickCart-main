@@ -65,7 +65,7 @@ export const createUserOrder = inngest.createFunction(
     {
         id: "create-user-order",
         batachEvents:{
-            maxSize: 25, // Maximum number of events to process in a batch
+            maxSize: 5, // Maximum number of events to process in a batch
             timeout: '5s' // Maximum duration to wait for events in milliseconds (5 minutes)
         }
     },
@@ -85,6 +85,5 @@ export const createUserOrder = inngest.createFunction(
         await connectDB();
         await Order.insertMany(orders);
         return {success: true, processed: orders.length};
-        console.log(`Order created for user ${userId} with items:`, items, "and address:", address);
     }
 );
