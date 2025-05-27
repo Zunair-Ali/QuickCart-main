@@ -41,7 +41,7 @@ const AddProduct = () => {
       setDescription('');
       setCategory("EarPhone");
       setPrice('');
-      setOfferPrice();
+      setOfferPrice('');
     } else{
       toast.error(data.message)
     }

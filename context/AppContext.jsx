@@ -1,5 +1,4 @@
 "use client";
-import { userDummyData } from "@/assets/assets";
 import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -38,20 +37,19 @@ export const AppContextProvider = (props) => {
 
   const fetchUserData = async () => {
     try {
-      if (user && user.publicMetadata?.role === "seller") {
+      if (user.publicMetadata.role === "seller") {
         setIsSeller(true);
       }
-      const { token } = await getToken();
+      const token = await getToken();
       const { data } = await axios.get("/api/user/data", {
         headers: { Authorization: `Baarer ${token}` },
       });
       if (data.success) {
-        setUserData(data.error);
+        setUserData(data.user);
         setCartItems(data.user.cartItems);
       } else {
         toast.error(data.message);
       }
-      setUserData(userDummyData);
     } catch (error) {
       toast.error(error.message);
     }
@@ -67,13 +65,13 @@ export const AppContextProvider = (props) => {
     setCartItems(cartData);
     if (user) {
       try {
-        const { token } = await getToken();
+        const token  = await getToken();
         await axios.post(
           "/api/cart/update",
           { cartData },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        toast.success("Itme added to cart");
+        toast.success("Item added to cart");
       } catch (error) {
         toast.error(error.message);
       }
@@ -89,7 +87,7 @@ export const AppContextProvider = (props) => {
     }
     if (user) {
       try {
-        const { token } = await getToken();
+        const token = await getToken();
         await axios.post(
           "/api/cart/update",
           { cartData },
