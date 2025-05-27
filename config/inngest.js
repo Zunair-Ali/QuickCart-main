@@ -9,17 +9,17 @@ export const inngest = new Inngest({ id: "quickcart-next" });
 // Inngest data to save user data from database
 export const snycUserCreation = inngest.createFunction(
     {
-        id:"sync-user-form-clerk"
+        id:"sync-user-from-clerk"
     },
     {
         event:"clerk/user.created"
     },
-    async (event) => {
+    async ({event}) => {
         const {id,first_name,last_name,email_addresses,image_url} = event.data
         const userData ={
             _id:id,
             email: email_addresses[0].email_address,
-            name: first_name + '' + last_name,
+            name: first_name + ' ' + last_name,
             imageUrl: image_url
         }
         await connectDB()
@@ -33,7 +33,7 @@ export const snycUserUpdation = inngest.createFunction(
         id:'update-user-from-clerk'
     },
     {event:'clerk/user.updated'},
-    async (event) => {
+    async ({event}) => {
         const {id,first_name,last_name,email_addresses,image_url} = event.data
         const userData ={
             _id:id,
@@ -49,10 +49,10 @@ export const snycUserUpdation = inngest.createFunction(
 
 export const snycUserDeletion = inngest.createFunction(
     {
-        id:'delete-user-from-clerk'
+        id:'delete-user-with-clerk'
     },
     {event:'clerk/user.delete'},
-    async (event) => {
+    async ({event}) => {
         const {id} = event.data
         await connectDB()
         await User.findByIdAndDelete(id)
@@ -64,7 +64,7 @@ export const snycUserDeletion = inngest.createFunction(
 export const createUserOrder = inngest.createFunction(
     {
         id: "create-user-order",
-        batachEvents:{
+        batchEvents:{
             maxSize: 5, // Maximum number of events to process in a batch
             timeout: '5s' // Maximum duration to wait for events in milliseconds (5 minutes)
         }

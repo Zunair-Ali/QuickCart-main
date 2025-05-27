@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 
 let cached = global.mongoose;
-
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
-} 
+}
 
 async function connectDB() {
   if (cached.conn) {
@@ -12,25 +11,18 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    const options = {
+    const opts = {
       bufferCommands: false,
     };
 
-    const uri = `${process.env.MONGODB_URI}/quickcart`;
-
     cached.promise = mongoose
-      .connect(uri, options)
-      .then((mongoose) => mongoose);
+      .connect(`${process.env.MONGODB_URI}/quickcart`, opts)
+      .then((mongoose) => {
+        return mongoose;
+      });
   }
 
-  try {
-    cached.conn = await cached.promise;
-  } catch (error) {
-    cached.promise = null;
-    console.error("MongoDB connection error:", error);
-    throw error;
-  }
-
+  cached.conn = await cached.promise;
   return cached.conn;
 }
 

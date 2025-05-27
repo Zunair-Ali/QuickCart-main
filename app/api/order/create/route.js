@@ -5,21 +5,20 @@ import { inngest } from "@/config/inngest";
 import User from "@/models/User";
 
 
-export async function POST(required){
+export async function POST(request){
     try {
-        const { userId } = getAuth(required);
-        const { items,  address } = await required.json();
+        const { userId } = getAuth(request);
+        const { items,  address } = await request.json();
         if (!address || items.length === 0) {
             return NextResponse.json({ success: false, message: "Invalid data" });
         }
         // calculate ammount using items
         const amount = await items.reduce(async (acc, item) => {
             const product = await Product.findById(item.product);
-            return acc + (product.offerPrice * item.quantity);
+            return acc + product.offerPrice * item.quantity;
         }, 0);
-        await inngest.sonf({
-            name: "order",
-            event: "order.create",
+        await inngest.send({
+            name: "order/created",
             data: {
                 userId,
                 items,

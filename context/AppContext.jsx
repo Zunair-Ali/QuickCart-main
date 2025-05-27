@@ -146,7 +146,7 @@ export const AppContextProvider = (props) => {
     setIsSeller,
     userData,
     fetchUserData,
-    products,
+    products, 
     fetchProductData,
     cartItems,
     setCartItems,
