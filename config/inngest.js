@@ -51,7 +51,7 @@ export const snycUserDeletion = inngest.createFunction(
     {
         id:'delete-user-with-clerk'
     },
-    {event:'clerk/user.delete'},
+    {event:'clerk/user.deleted'},
     async ({event}) => {
         const {id} = event.data
         await connectDB()
@@ -79,7 +79,7 @@ export const createUserOrder = inngest.createFunction(
                 items: event.data.items,
                 address: event.data.address,
                 amount: event.data.amount,
-                date:event.data.date,
+                date:event.data.date
             };
         });
         await connectDB();

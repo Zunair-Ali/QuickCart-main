@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { assets, orderDummyData } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
@@ -8,7 +8,6 @@ import Navbar from "@/components/Navbar";
 import Loading from "@/components/Loading";
 import axios from "axios";
 import toast from "react-hot-toast";
-
 const MyOrders = () => {
 
     const { currency,getToken,user } = useAppContext();
@@ -18,7 +17,7 @@ const MyOrders = () => {
 
     const fetchOrders = async () => {
         try {
-            const token = await getToken();
+            const token = await getToken()
             const {data} = await axios.get('/api/order/list', {headers: { Authorization: `Bearer ${token}` }});
             if (data.success) {
                 setOrders(data.orders.reverse());

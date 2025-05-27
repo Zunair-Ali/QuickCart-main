@@ -1,4 +1,3 @@
-import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -6,7 +5,7 @@ import axios from "axios";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount,user,getToken,cartItems,setCartItems } = useAppContext()
+  const { currency, router, getCartCount, getCartAmount,getToken,user,cartItems,setCartItems } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -14,7 +13,6 @@ const OrderSummary = () => {
 
   const fetchUserAddresses = async () => {
     try {
-      setUserAddresses(addressDummyData);
       const token = await getToken();
       const {data} = await axios.get('/api/user/get-address',{headers:{Authorization:`Bearer ${token}`}})
       if (data.success) {

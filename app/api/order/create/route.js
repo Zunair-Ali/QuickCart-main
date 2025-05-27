@@ -8,14 +8,14 @@ import User from "@/models/User";
 export async function POST(request){
     try {
         const { userId } = getAuth(request);
-        const { items,  address } = await request.json();
+        const { address,items } = await request.json();
         if (!address || items.length === 0) {
             return NextResponse.json({ success: false, message: "Invalid data" });
         }
         // calculate ammount using items
         const amount = await items.reduce(async (acc, item) => {
             const product = await Product.findById(item.product);
-            return acc + product.offerPrice * item.quantity;
+            return await acc + product.offerPrice * item.quantity;
         }, 0);
         await inngest.send({
             name: "order/created",
@@ -23,7 +23,7 @@ export async function POST(request){
                 userId,
                 items,
                 address,
-                amount: amount + Math.floor(amount * 0.02), // Adding a random amount to avoid duplicates
+                amount: amount + Math.floor(amount * 0.02),
                 date: Date.now(),
             },
         })
@@ -33,7 +33,6 @@ export async function POST(request){
         await user.save();
         return NextResponse.json({ success: true, message: "Order placed successfully" });
     } catch (error) {
-        console.log(error);
         return NextResponse.json({ success: false, message: error.message });
     }
 }
