@@ -1,160 +1,56 @@
-"use client";
-import { useAuth, useUser } from "@clerk/nextjs";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import React from "react";
+import { assets } from "@/assets/assets";
+import Image from "next/image";
 
-export const AppContext = createContext();
-
-export const useAppContext = () => {
-  return useContext(AppContext);
-};
-
-export const AppContextProvider = (props) => {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY;
-  const router = useRouter();
-  const { user } = useUser();
-  const { getToken } = useAuth();
-
-  const [products, setProducts] = useState([]);
-  const [userData, setUserData] = useState(false);
-  const [isSeller, setIsSeller] = useState(false);
-  const [cartItems, setCartItems] = useState({});
-
-  const fetchProductData = async () => {
-    try {
-      const { data } = await axios.get("/api/product/list");
-      if (data.success) {
-        setProducts(data.products);
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const fetchUserData = async () => {
-    try {
-      if (user.publicMetadata.role === "seller") {
-        setIsSeller(true);
-      }
-      const token = await getToken();
-      const { data } = await axios.get("/api/user/data", {
-        headers: { Authorization: `Baarer ${token}` },
-      });
-      if (data.success) {
-        setUserData(data.user);
-        setCartItems(data.user.cartItems);
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const addToCart = async (itemId) => {
-    let cartData = structuredClone(cartItems);
-    if (cartData[itemId]) {
-      cartData[itemId] += 1;
-    } else {
-      cartData[itemId] = 1;
-    }
-    setCartItems(cartData);
-    if (user) {
-      try {
-        const token  = await getToken();
-        await axios.post(
-          "/api/cart/update",
-          { cartData },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success("Item added to cart");
-      } catch (error) {
-        toast.error(error.message);
-      }
-    }
-  };
-
-  const updateCartQuantity = async (itemId, quantity) => {
-    let cartData = structuredClone(cartItems);
-    if (quantity === 0) {
-      delete cartData[itemId];
-    } else {
-      cartData[itemId] = quantity;
-    }
-    if (user) {
-      try {
-        const token = await getToken();
-        await axios.post(
-          "/api/cart/update",
-          { cartData },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success("cart Updated");
-      } catch (error) {
-        toast.error(error.message);
-      }
-    }
-    setCartItems(cartData);
-  };
-
-  const getCartCount = () => {
-    let totalCount = 0;
-    for (const item in cartItems) {
-      if (cartItems[item] > 0) {
-        totalCount += cartItems[item];
-      }
-    }
-    return totalCount;
-  };
-
-  const getCartAmount = () => {
-    let totalAmount = 0;
-    for (const item in cartItems) {
-      let itemInfo = products.find((product) => product._id === item);
-      if (itemInfo && cartItems[item] > 0) {
-        totalAmount += itemInfo.offerPrice * cartItems[item];
-      }
-    }
-    return Math.floor(totalAmount * 100) / 100;
-  };
-
-  useEffect(() => {
-    if(user){
-
-      fetchProductData();
-    }
-  }, [user]); // Add `user` dependency to make sure it runs when user is available
-
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-    }
-  }, [user]);
-
-  const value = {
-    user,
-    currency,
-    getToken,
-    router,
-    isSeller,
-    setIsSeller,
-    userData,
-    fetchUserData,
-    products, 
-    fetchProductData,
-    cartItems,
-    setCartItems,
-    addToCart,
-    updateCartQuantity,
-    getCartCount,
-    getCartAmount,
-  };
-
+const Footer = () => {
   return (
-    <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
+    <footer>
+      <div className="flex flex-col md:flex-row items-start justify-center px-6 md:px-16 lg:px-32 gap-10 py-14 border-b border-gray-500/30 text-gray-500">
+        <div className="w-4/5">
+          <Image className="w-28 md:w-32" src={assets.logo} alt="logo" />
+          <p className="mt-6 text-sm">
+            Lorem Ipsum is simply dummy text of the printing and typesetting
+            industry. Lorem Ipsum has been the industry's standard dummy text
+            ever since the 1500s, when an unknown printer took a galley of type
+            and scrambled it to make a type specimen book.
+          </p>
+        </div>
+
+        <div className="w-1/2 flex items-center justify-start md:justify-center">
+          <div>
+            <h2 className="font-medium text-gray-900 mb-5">Company</h2>
+            <ul className="text-sm space-y-2">
+              <li>
+                <a className="hover:underline transition" href="#">Home</a>
+              </li>
+              <li>
+                <a className="hover:underline transition" href="#">About us</a>
+              </li>
+              <li>
+                <a className="hover:underline transition" href="#">Contact us</a>
+              </li>
+              <li>
+                <a className="hover:underline transition" href="#">Privacy policy</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="w-1/2 flex items-start justify-start md:justify-center">
+          <div>
+            <h2 className="font-medium text-gray-900 mb-5">Get in touch</h2>
+            <div className="text-sm space-y-2">
+              <p>+1-234-567-890</p>
+              <p>contact@gmail.com</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p className="py-4 text-center text-xs md:text-sm">
+        Copyright 2025 © Zunair | All Right Reserved.
+      </p>
+    </footer>
   );
 };
+
+export default Footer;
